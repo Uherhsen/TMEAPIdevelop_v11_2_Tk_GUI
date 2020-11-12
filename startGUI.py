@@ -4,7 +4,7 @@ Created on Tue Apr 14 20:40:50 2020
 """
 import description_assembly as da
 #from GetDataTME_with_openpyxl import number_of_articles, articlesList, search_articles,search_param, products_files
-import GetDataTME_with_openpyxl as GD 
+from GetDataTME_with_openpyxl import GetData as GD 
 from tkinter import *
 from tkinter import messagebox as mb
 import openpyxl, threading, json, os, shutil, webbrowser, configparser
@@ -20,6 +20,7 @@ action1 = 'Products/Search' # request method, метод пинг Utils/Ping
 action2 = 'Products/GetParameters'
 action3 = 'Products/GetProductsFiles'
 GD.flag = 0
+get_data = GD(xlsxpath,params,token,app_secret)
 TEXT=''
 # .ini
 config = configparser.ConfigParser()
@@ -198,15 +199,12 @@ def startDATA(): #
 # Поток
 def my_thread():
     GD.flag = 1
-    n = GD.number_of_articles(xlsxpath)
-    work_articles_list_A = GD.articlesList(n, 'A', xlsxpath)
-    GD.search_articles(work_articles_list_A, xlsxpath,params,token,app_secret,action1)
+    get_data.duty_cycle() # ____________________________________________________THEAD PROCESS______________________________________________________________
+    
     # попытки выводить в лейлбл информацию
     #infolabel['text']=TEXT
     #infolabel.update_idletasks()
-    work_articles_list_B = GD.articlesList(n,'B', xlsxpath)
-    GD.search_param(work_articles_list_B, xlsxpath,params,token,app_secret,action2)
-    GD.products_files(work_articles_list_B, xlsxpath,params,token,app_secret,action3)
+    
     # функции описания
     if GD.flag == 1:
         da.checkKey(xlsxpath,jsonfilename)

@@ -6,7 +6,7 @@ Created on Tue Feb  4 16:00:40 2020
 """
 from get_product_name import product_type
 from config import replace_list # Импорт переменной-списка замен
-import GetDataTME_with_openpyxl as Data
+from GetDataTME_with_openpyxl import GetData as Data
 import openpyxl,json,configparser
 #
 # Проверка в БД json ключей и добавление новых, ОБЯЗАТЕЛЬНО К ВЫПОЛНЕНИЮ
@@ -44,6 +44,7 @@ def checkKey(xlsxpath,jsonfilename):
 #
 # для замен, принимает массив замент типа [[a,b],[a,b],...[a,b]] и текст, в котором a будет заменено на b
 def replaceAB(replList,text):
+    """Для замен, принимает массив замент типа [[a,b],[a,b],...[a,b]] и текст, в котором a будет заменено на b"""
     for a,b in replList:
         text = text.replace(a,b)
     return text        
