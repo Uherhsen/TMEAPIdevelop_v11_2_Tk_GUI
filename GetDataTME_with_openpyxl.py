@@ -191,6 +191,8 @@ class GetData:
             
     def duty_cycle(self, rng1=0):
         """ОСНОВНОЙ ЦИКЛ. Цикл проходящий по всем деталям из файла XLSX, заполняющая все графы."""
+        self.quantity_of_articles = GetData.number_of_articles(self.path)
+        self.articles_list = GetData.articlesList(self.quantity_of_articles,"A",self.path)
         # Открываем Эксель
         wb = openpyxl.load_workbook(self.path)#путь к файлу
         sheet = wb.active
