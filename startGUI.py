@@ -103,7 +103,7 @@ def NoneRemove(mylist):
 def get_xlsxdata():
     # ПОЛУЧАЕМ КОЛИЧЕСТВО АРТИКУЛОВ И ИХ СПИСОК
     n = GD.number_of_articles(xlsxpath)
-    print("Кол-во артикуло",n)
+    #print("Кол-во артикуло",n)
     work_articles_list_A = GD.articlesList(n, 'A', xlsxpath)
     work_articles_list_I = GD.articlesList(n, 'I', xlsxpath)
     work_articles_list_G = GD.articlesList(n, 'G', xlsxpath)

@@ -120,8 +120,12 @@ class GetData:
                 line_data["Description"] = piece_of_data['Data']['ProductList'][0]['Description']
             except IndexError:
                 print(part_name, ": Нет дескрипшина")
-            try:   
-                line_data["Photo"] = "https:" + piece_of_data['Data']['ProductList'][0]["Photo"]
+            try:
+                photo = "https:" + piece_of_data['Data']['ProductList'][0]["Photo"]
+                if photo != "https:":
+                    line_data["Photo"] = "https:" + piece_of_data['Data']['ProductList'][0]["Photo"]
+                else:
+                    line_data["Photo"] = ""
             except IndexError:
                 print(part_name, ": Нет фото")    
             try:    
@@ -146,7 +150,12 @@ class GetData:
                     weight = weight*0.001
                     #print('{:f}'.format(weight))
                     weight = round(weight,(('{:f}'.format(weight)).count('0'))+1) # округление
-                    line_data["Weight"]= weight 
+                    line_data["Weight"]= weight
+                elif piece_of_data['Data']['ProductList'][0]['WeightUnit']=='mg':
+                    #print("Вес в МГ")
+                    weight = weight*0.000001
+                    weight = round(weight,(('{:f}'.format(weight)).count('0'))+1) # округление
+                    line_data["Weight"]= weight
                 else:
                     line_data["Weight"]= weight
             if GetData.flag == 1:
