@@ -178,6 +178,9 @@ class GetData:
                         parameters.pop('#Promotion','Нет ключа')
                         parameters.pop('#Promotion','Нет ключа')
                         parameters.pop('вес','Нет ключа')
+                        parameters.pop('Вес','Нет ключа')
+                        parameters.pop('Сопутствующие товары','Нет ключа')
+                        parameters.pop('Ресурс','Нет ключа')
                         line_data["ParameterList"] = parameters
             if GetData.flag == 1:
                 print("Получение даташита детали",part_name,". Экшн GetProductsFiles")
