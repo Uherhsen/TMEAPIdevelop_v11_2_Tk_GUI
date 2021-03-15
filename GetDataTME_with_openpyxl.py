@@ -183,6 +183,8 @@ class GetData:
                         parameters.pop('Ресурс','Нет ключа')
                         parameters.pop('Дополнительные функции','Нет ключа')
                         parameters.pop('Электрический ресурс','Нет ключа')
+                        parameters.pop('Alias','Нет ключа')
+                        parameters.pop('Соответствуют норме','Нет ключа')
                         line_data["ParameterList"] = parameters
             if GetData.flag == 1:
                 print("Получение даташита детали",part_name,". Экшн GetProductsFiles")
