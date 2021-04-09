@@ -85,12 +85,12 @@ def textTemplate(i,link_key):
 #============================ ОСНОВНОЙ СЦЕНАРИЙ =========================>
 #
 def desc_assembly(xlsxpath,jsonfilename):
-    '''Основной сценарий создания описания, производит конкатенацию строк, замены и пр.'''
+
     global wb
     wb = openpyxl.load_workbook(xlsxpath)#путь к файлу
     global sheet
     sheet = wb.active # лист экселя
-    list_range = Data.number_of_articles(xlsxpath) # количество позиций
+    list_range = Data.number_of_articles(xlsxpath) # диапазон
     # Получаем словарь значений из базы
     try:
         global data
@@ -99,77 +99,47 @@ def desc_assembly(xlsxpath,jsonfilename):
         print('Файл базы database.json отсутствует, или неверно указанно имя файла')
     for i in range(1, list_range+1):
         print(i)
-        # Отделяем категорию от дескрипшина
-        name = product_type(sheet['G'+str(i)].value) # типы продукта !!!
-        # Помещаем в колонку J тип продукции
-        sheet['J'+str(i)] = name
-        #print(name)
-        global prod_param
-        prod_param = sheet['G'+str(i)].value
-        if prod_param != None:
+        try:
+            # Отделяем категорию от дескрипшина
+            name = product_type(sheet['G'+str(i)].value) # типы продукта !!!
+            # Помещаем в колонку J типы продукции
+            sheet['J'+str(i)] = name
+            #print(name)
+            global prod_param
+            prod_param = sheet['G'+str(i)].value
+            # цикл общих замен
+            prod_param = replaceAB(replace_list,prod_param)
             try:
                 # Переменная-ссылка-ключ к словарю с описаниями
                 link_key = data[0][name]
                 # Проверка наличия флага "MY_FUNСTION" для включения иных сценариев
                 if data[1][link_key][0] == "MY_FUNСTION":
                     # Включение функции написанной в базе
-                    eval(data[1][link_key][1]) # запуск альтернативного сценария
-                    continue
-            except KeyError:
-                sheet["I"+str(i)]= None
-                print("Не указан шаблон-описание")
-                continue
-            else:
-                # Получение словаря
-                # превращаем в словарь текст
-                params_dict = eval(prod_param)
-                # Избавляемся от ненужного теперь ключа 'Категория продукта' 
-                params_dict.pop('Категория продукта','Нет ключа')
-                # УДАЛЕНИЯ ПО КЛЮЧУ
-                #
-                try:
-                    for pop_param in data[1][link_key][3]:
-                        params_dict.pop(pop_param,'Нет ключа')
-                except IndexError:
-                    print('Без замен по ключу')
-                
-                # Преобразование словаря в текст
-                strparam=[]
-                # Получаем словарь
-                for dict_item in list( params_dict.items()):
-                    dict_item=dict_item[0]+' '+ dict_item[1] #.lower()
-                    strparam.append(dict_item)
-                comma = ', '
-                # преобразуем словарь в текст
-                prod_param = comma.join(strparam)
-                # цикл общих замен  
-                prod_param = replaceAB(replace_list,prod_param)
-                # Сборка описания: КОНКАТЕНАЦИЯ
-                try:
-                    my_descr = data[1][link_key][0]+prod_param+data[1][link_key][1]
-                except TypeError:
-                    print('Шаблон-описание пуст')
-                    continue
-                except IndexError:
-                    print('Ошибка в шаблоне-описании (IndexError)')
-                    continue
-                # ЧАСТНЫЕ ЗАМЕНЫ  (по словаою из БД джесон)
-                try:
-                    if data[1][link_key][2] == []:
-                        sheet["I"+str(i)]= my_descr
-                    else:
+                    eval(data[1][link_key][1]) # описание в data !!!!
+                else:   
+                    try:
+                        my_descr = data[1][link_key][0]+prod_param+data[1][link_key][1]
+                    except TypeError:
+                        print('Шаблон-описание пуст')
+                        continue
+                    except IndexError:
+                        print('Ошибка в шаблоне-описании')
+                        continue
+                    try:
                         my_descr=replaceAB(data[1][link_key][2],my_descr) 
                         #for x,y in data[1][link_key][2]: # остатки после рефакторинга
                             #my_descr = my_descr.replace(x,y)
                         print('С доп. заменой:\n', my_descr)
                         sheet["I"+str(i)]= ' '+my_descr # С доп. заменой КОНКАТЕНИРУЕТ МАРКЕР В ТЕКСТЕ СООБЩАЮЩИЙ О ДОПОЛНИТЕЛЬНЫХ ЗАМЕНЫХ
-                except IndexError:
-                    # Если в БД джейсон нет блока с заменами к этому типу продукции, то оставляем все как есть
-                    print(my_descr)
-                    sheet["I"+str(i)]= my_descr
-            
-        else:
-            print('Параметров продукта нет на TME')
+                    except IndexError:
+                        print(my_descr)
+                        sheet["I"+str(i)]= my_descr
+            except KeyError:
+                sheet["I"+str(i)]= None
+                print("Не указан шаблон-описание")
+                continue
+        except AttributeError:
+            print('Артикула нет на ТМЕ')
             continue   
     wb.save(xlsxpath)
     print('\n\n Сборка описания завершена')

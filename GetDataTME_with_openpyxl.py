@@ -115,7 +115,7 @@ class GetData:
             print("Поиск по экшену GetProducts")
             try:    
                 line_data["Symbol"] = piece_of_data['Data']['ProductList'][0]['Symbol']
-            except IndexError:
+            except TypeError: #IndexError:
                 print(part_name, ": Название детали не найдено")
             try:
                 line_data["Description"] = piece_of_data['Data']['ProductList'][0]['Description']
