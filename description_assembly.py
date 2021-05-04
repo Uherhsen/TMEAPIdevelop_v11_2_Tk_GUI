@@ -124,7 +124,7 @@ def desc_assembly(xlsxpath,jsonfilename):
                 # превращаем в словарь текст
                 params_dict = eval(prod_param)
                 # Избавляемся от ненужного теперь ключа 'Категория продукта' 
-                params_dict.pop('Категория продукта','Нет ключа')
+                #params_dict.pop('Категория продукта','Нет ключа')
                 # УДАЛЕНИЯ ПО КЛЮЧУ
                 #
                 try:

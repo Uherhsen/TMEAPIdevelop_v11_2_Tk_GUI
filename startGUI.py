@@ -560,9 +560,18 @@ def editor_menu_command():
             newreplist.append([Arepl[i],Brepl[i]])
         if newreplist == []:
             newjsonitems = [itemsin,itemsout]
+            data[1][linkname][0]=newjsonitems[0]
+            data[1][linkname][1]=newjsonitems[1]
         else:
-            newjsonitems = [itemsin,itemsout,newreplist]
-        data[1][linkname]=newjsonitems
+            newjsonitems = [itemsin,itemsout,newreplist]   
+            #data[1][linkname]=newjsonitems # Эта строка все подтирает 
+            data[1][linkname][0]=newjsonitems[0]
+            data[1][linkname][1]=newjsonitems[1]
+            try:
+                data[1][linkname][2]=newjsonitems[2]
+            except IndexError:
+                data[1][linkname].append(newjsonitems[2])
+        
         # Создаем копию БД JSON
         jsonfilename_backup_copy = jsonfilename + '_backup_copy.json'
         if os.path.exists(jsonfilename_backup_copy):
