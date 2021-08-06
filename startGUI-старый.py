@@ -487,55 +487,6 @@ def editor_menu_command():
         else:
             replacementin.delete(masterindex)
             replacementout.delete(masterindex)
-    # Удалени ключа для удаления параметра =)__________________________________________________________________________NEW
-    def deletekeydel(event):
-        '''Удаленеи кнопкой Del ключа из списка ключей для уделения параметр:значение'''
-        keyindex = keyremovelist.curselection()[0] # получаем индекс в виде кортежа (i,) 
-        if keyindex == 0:
-            pass
-        else:
-            keyremovelist.delete(keyindex)
-    # ======== активировать меню ввода ключей для удаления ========= NNNNNNNNNNNNNNNNNNNNNNNNEEEEEEEEEWWWWWWWWWW FFFIIIICHA
-    def inputkey(event):
-        '''Функция с полями для удаления по ключу (НОВАЯ)'''
-        def keyconfirm():
-            '''Функция кнопки подтверждения введенного ключа-параметра'''
-            newkeydel = keydelentry.get()
-            if newkeydel=="":
-                if keyindex >0:
-                
-                    keyremovelist.delete(keyindex)
-            else:
-                if keyindex == 0:
-                    keyremovelist.insert(END,newkeydel)
-                else:
-                    keyremovelist.delete(keyindex)
-                    keyremovelist.insert(keyindex,newkeydel)
-            print(newkeydel)
-            inputkeylevel.destroy()
-                
-        # LДля нажатия энтер
-        def enterconfirm(event):
-            keyconfirm()
-        # Создаем всплывающее окно   
-        inputkeylevel=Toplevel()
-        inputkeylevel.title('Ввод параметра')
-        # Убирает рамку вокруг окна
-        #inputlevel.overrideredirect(True) 
-        x = root.winfo_pointerx()
-        y = root.winfo_pointery()
-        inputkeylevel.geometry('+'+str(x)+'+'+str(y)) # '450x140'+
-        keyindex = keyremovelist.curselection()[0] # получаем индекс в виде кортежа (i,)
-        keytext = keyremovelist.get(keyindex)
-        
-        keydelentry=Entry(inputkeylevel, width=70)
-        keydelentry.insert(0,keytext)
-        enterkeybutton=Button(inputkeylevel, text='>>>', command=keyconfirm)
-        # размещение элементов
-        Label(inputkeylevel, text='Параметр для удаления:',font='Arial 8').pack(padx=1, pady=2, anchor=W)
-        keydelentry.pack(padx=1, pady=1)
-        enterkeybutton.pack(padx=1, pady=2)
-        keydelentry.bind('<Return>', enterconfirm)
     # ++++++++ активировать меню для ввода+++++++ 
     def inputreplase(event):
         # кнопка >>>
@@ -599,8 +550,6 @@ def editor_menu_command():
         Brepl=replacementout.get(1,END)
         textinget=textin.get(1.0,END)
         textoutget=textout.get(1.0,END)
-        keysdel= keyremovelist.get(1,END)
-        
         # Удаляем перенос строки
         def remove_n(textinout):
             textinout = textinout.rstrip('\n')
@@ -609,11 +558,20 @@ def editor_menu_command():
         itemsout = remove_n(textoutget)
         for i in range(len(Arepl)):
             newreplist.append([Arepl[i],Brepl[i]])
-        data[1][linkname]=[]
-        newjsonitems = [itemsin,itemsout,newreplist,keysdel]
-        for jsonitem in newjsonitems:    
-            data[1][linkname].append(jsonitem)
-            
+        if newreplist == []:
+            newjsonitems = [itemsin,itemsout]
+            data[1][linkname][0]=newjsonitems[0]
+            data[1][linkname][1]=newjsonitems[1]
+        else:
+            newjsonitems = [itemsin,itemsout,newreplist]   
+            #data[1][linkname]=newjsonitems # Эта строка все подтирает 
+            data[1][linkname][0]=newjsonitems[0]
+            data[1][linkname][1]=newjsonitems[1]
+            try:
+                data[1][linkname][2]=newjsonitems[2]
+            except IndexError:
+                data[1][linkname].append(newjsonitems[2])
+        
         # Создаем копию БД JSON
         jsonfilename_backup_copy = jsonfilename + '_backup_copy.json'
         if os.path.exists(jsonfilename_backup_copy):
@@ -655,14 +613,13 @@ def editor_menu_command():
     editorlevel.overrideredirect(False) 
     # Создание элементов
     boxscrollframe=Frame(editorlevel, background = backgroundColor)
-    
     l0 = Label(editorlevel, background = backgroundColor, text='Шаблон по ссылке:')
     linklabel = Label(editorlevel, width=50, background = backgroundColor, text=linkname, font='Arial 14')
     l1 = Label(editorlevel, background = backgroundColor, text='Фраза для начала описания:')
-    textin=Text(editorlevel, wrap=WORD, width=65, height=7)
+    textin=Text(editorlevel, wrap=WORD, width=75, height=7)
     textin.insert(1.0,jsontextin)
     l2 = Label(editorlevel, background = backgroundColor, text='Фраза для конца описания:')
-    textout=Text(editorlevel, wrap=WORD, width=65, height=7)
+    textout=Text(editorlevel, wrap=WORD, width=75, height=7)
     textout.insert(1.0,jsontextout)
     l3 = Label(editorlevel, background = backgroundColor, text='Список пар для замен:')
     # Поле с списком замен (заменяемое)
@@ -670,13 +627,7 @@ def editor_menu_command():
     # Скролл
     doublescroll=Scrollbar(boxscrollframe, bg = backgroundColor, command=double_scrollbar)
     # Поле с списком замен (заменитель)
-    replacementout=Listbox(boxscrollframe, width=60)
-    
-    # Лейбл для удаления по ключу
-    keyremlabel=Label(editorlevel, background = backgroundColor, text='Удаления по названию параметра:')
-    # Список удаления по-ключу (по анзванию параметра удаляется пара параметр:значение)
-    keyremovelist=Listbox(editorlevel, width=35, height=18)
-    
+    replacementout=Listbox(boxscrollframe, width=50)
     # Заполнеие замен
     try:
         repllist = data[1][linkname][2]
@@ -688,32 +639,16 @@ def editor_menu_command():
     except IndexError:
         replacementin.insert(0,"") 
         replacementout.insert(0,"")
-    
-    # Заполнение списка удаления по ключу:
-    try:
-        keyfordel = data[1][linkname][3]
-        for keyd in keyfordel:
-            keyremovelist.insert(0,keyd)
-            
-        keyremovelist.insert(0,"") 
-        
-    except IndexError:
-        keyremovelist.insert(0,"") 
-    
     # Кнопки
     ok = Button(editorlevel, text='Сохранить', command = savejson)
     cancel = Button(editorlevel, text='Отмена', command=exitmenu)
     #
     l0.grid(row=0, column=0, sticky=SW, padx=4, pady=4 )
-    linklabel.grid(row=1, column=0, sticky=NW, columnspan=3, padx=4, pady=4 )
+    linklabel.grid(row=1, column=0, sticky=NW, columnspan=4, padx=4, pady=4 )
     l1.grid(row=2, column=0, sticky=SW, padx=4, pady=4)
-    textin.grid(row=3, column=0, columnspan=3, padx=4, pady=4 )
+    textin.grid(row=3, column=0, columnspan=4, padx=4, pady=4 )
     l2.grid(row=4, column=0, sticky=SW, padx=4, pady=4 )
-    textout.grid(row=5, column=0, columnspan=3, padx=4, pady=4 )
-    
-    keyremlabel.grid(row=2, column=3,  padx=4, pady=4 )
-    keyremovelist.grid(row=3, column=3,  rowspan=3, padx=4, pady=4 )
-    
+    textout.grid(row=5, column=0, columnspan=4, padx=4, pady=4 )
     l3.grid(row=6, column=0, sticky=SW, padx=4, pady=4 )
     replacementin.grid(row=7, column=0,sticky=W+E, columnspan=2, padx=1, pady=4 )
     # Рамка
@@ -727,16 +662,9 @@ def editor_menu_command():
     # Двойной клик
     replacementin.bind('<Double-Button-1>', inputreplase)
     replacementout.bind('<Double-Button-1>', inputreplase)
-    # Запус ENTERом
-    replacementin.bind('<Return>', inputreplase)
-    replacementout.bind('<Return>', inputreplase)
     # Удалить кнопкой Del
     replacementin.bind('<Delete>', deleterepl)
     replacementout.bind('<Delete>', deleterepl)
-    # 
-    keyremovelist.bind('<Double-Button-1>',inputkey)
-    keyremovelist.bind('<Delete>', deletekeydel)
-    keyremovelist.bind('<Return>',inputkey)
 #    
 # ++++++==========================++++++++======================Создание нового шаблона
 def new_textpat_menu_command():
@@ -761,55 +689,6 @@ def new_textpat_menu_command():
         else:
             replacementin.delete(masterindex)
             replacementout.delete(masterindex)
-    # Удалени ключа для удаления параметра =)
-    def deletekeydel(event):
-        '''Удаленеи кнопкой Del ключа из списка ключей для уделения параметр:значение'''
-        keyindex = keyremovelist.curselection()[0] # получаем индекс в виде кортежа (i,) 
-        if keyindex == 0:
-            pass
-        else:
-            keyremovelist.delete(keyindex)
-    # ======== активировать меню ввода ключей для удаления =========
-    def inputkey(event):
-        '''Функция с полями для удаления по ключу (НОВАЯ)'''
-        def keyconfirm():
-            '''Функция кнопки подтверждения введенного ключа-параметра'''
-            newkeydel = keydelentry.get()
-            if newkeydel=="":
-                if keyindex > 0:
-                    keyremovelist.delete(keyindex)
-            else:
-                if keyindex == 0:
-                    keyremovelist.insert(END,newkeydel)
-                else:
-                    keyremovelist.delete(keyindex)
-                    keyremovelist.insert(keyindex,newkeydel)
-            print(newkeydel)
-            inputkeylevel.destroy()    
-            
-        # LДля нажатия энтер
-        def enterconfirm(event):
-            keyconfirm()
-        # Создаем всплывающее окно   
-        inputkeylevel=Toplevel()
-        inputkeylevel.title('Ввод параметра')
-        # Убирает рамку вокруг окна
-        #inputlevel.overrideredirect(True) 
-        x = root.winfo_pointerx()
-        y = root.winfo_pointery()
-        inputkeylevel.geometry('+'+str(x)+'+'+str(y)) # '450x140'+
-        
-        keyindex = keyremovelist.curselection()[0] # получаем индекс в виде кортежа (i,)
-        keytext = keyremovelist.get(keyindex)
-       
-        keydelentry=Entry(inputkeylevel, width=70)
-        keydelentry.insert(0,keytext)
-        enterkeybutton=Button(inputkeylevel, text='>>>', command=keyconfirm)
-        # размещение элементов
-        Label(inputkeylevel, text='Параметр для удаления:',font='Arial 8').pack(padx=1, pady=2, anchor=W)
-        keydelentry.pack(padx=1, pady=1)
-        enterkeybutton.pack(padx=1, pady=2)
-        keydelentry.bind('<Return>', enterconfirm)
     # активировать меню для ввода замен
     def inputreplase(event):
         # кнопка >>>
@@ -876,7 +755,6 @@ def new_textpat_menu_command():
             Brepl=replacementout.get(1,END)
             textinget=textin.get(1.0,END)
             textoutget=textout.get(1.0,END)
-            keysdel= keyremovelist.get(1,END)
             # Удаляем перенос строки
             def remove_n(textinout):
                 textinout = textinout.rstrip('\n')
@@ -885,16 +763,12 @@ def new_textpat_menu_command():
             itemsout = remove_n(textoutget)
             for i in range(len(Arepl)):
                 newreplist.append([Arepl[i],Brepl[i]])
-            newjsonitems = [itemsin,itemsout,newreplist,keysdel]
-            
-            # if newreplist == []:
-            #     newjsonitems = [itemsin,itemsout]
-            # else:
-            #     newjsonitems = [itemsin,itemsout,newreplist]
-                
+            if newreplist == []:
+                newjsonitems = [itemsin,itemsout]
+            else:
+                newjsonitems = [itemsin,itemsout,newreplist]
             data[1][newTMELink]=newjsonitems
             data[0][typeTMEname] = newTMELink
-            
             # Создаем копию БД JSON
             jsonfilename_backup_copy = jsonfilename + '_backup_copy.json'
             if os.path.exists(jsonfilename_backup_copy):
@@ -946,39 +820,29 @@ def new_textpat_menu_command():
     entryLink = Entry(editorlevel, width=50)
     #entryLink.insert(0,linkname)
     l1 = Label(editorlevel, background = backgroundColor, text='Фраза для начала описания:')
-    textin=Text(editorlevel, width=65, height=7)
+    textin=Text(editorlevel, width=75, height=7)
     l2 = Label(editorlevel, background = backgroundColor, text='Фраза для конца описания:')
-    textout=Text(editorlevel, width=65, height=7)
+    textout=Text(editorlevel, width=75, height=7)
     l3 = Label(editorlevel, background = backgroundColor, text='Список пар для замен:')
     # Окошко с списком замен (заменяемое)
     replacementin=Listbox(editorlevel,  width=50)
     # Скролл
     doublescroll=Scrollbar(boxscrollframe, bg = backgroundColor, command=double_scrollbar)
     # Окошко с списком замен (заменитель)
-    replacementout=Listbox(boxscrollframe, width=60)
+    replacementout=Listbox(boxscrollframe, width=50)
     # Заполнение полей замен пустой строкой
     replacementin.insert(0,"") 
     replacementout.insert(0,"")
-    # Поля с ключами для удаления по параметру
-    # Лейбл для удаления по ключу
-    keyremlabel=Label(editorlevel, background = backgroundColor, text='Удаления по названию параметра:')
-    # Список удаления по-ключу (по анзванию параметра удаляется пара параметр:значение)
-    keyremovelist=Listbox(editorlevel, width=35, height=18) 
-    keyremovelist.insert(0,"") 
     # Кнопки
     ok = Button(editorlevel, text='Сохранить', command = savejson)
     cancel = Button(editorlevel, text='Отмена', command=exitmenu)
     # Размещение
     l0.grid(row=0, column=0, sticky=SW, padx=4, pady=4 )
-    entryLink.grid(row=1, column=0, sticky=NW, columnspan=3, padx=12, pady=4 )
+    entryLink.grid(row=1, column=0, sticky=NW, columnspan=4, padx=12, pady=4 )
     l1.grid(row=2, column=0, sticky=SW, padx=4, pady=4)
-    textin.grid(row=3, column=0, columnspan=3, padx=4, pady=4 )
+    textin.grid(row=3, column=0, columnspan=4, padx=4, pady=4 )
     l2.grid(row=4, column=0, sticky=SW, padx=4, pady=4 )
-    textout.grid(row=5, column=0, columnspan=3, padx=4, pady=4 )
-    # РАземещениея элементов удаления по ключу
-    keyremlabel.grid(row=2, column=3,  padx=4, pady=4 )
-    keyremovelist.grid(row=3, column=3,  rowspan=3, padx=4, pady=4 )
-    
+    textout.grid(row=5, column=0, columnspan=4, padx=4, pady=4 )
     l3.grid(row=6, column=0, sticky=SW, padx=4, pady=4 )
     replacementin.grid(row=7, column=0,sticky=W+E, columnspan=2, padx=1, pady=4 )
     # Рамка
@@ -996,15 +860,9 @@ def new_textpat_menu_command():
     # Двойной клик
     replacementin.bind('<Double-Button-1>', inputreplase)
     replacementout.bind('<Double-Button-1>', inputreplase)
-    replacementin.bind('<Return>', inputreplase)
-    replacementout.bind('<Return>', inputreplase)
     # Удалить кнопкой Del
     replacementin.bind('<Delete>', deleterepl)
     replacementout.bind('<Delete>', deleterepl)
-    # 
-    keyremovelist.bind('<Double-Button-1>',inputkey)
-    keyremovelist.bind('<Delete>', deletekeydel)
-    keyremovelist.bind('<Return>',inputkey)
 
 # удаление шаблона
 def delete_template():
